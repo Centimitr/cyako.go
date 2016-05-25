@@ -20,6 +20,19 @@ import (
 	"golang.org/x/net/websocket"
 )
 
+// return a http.Handler
+func (c *Cyako) Server(ws *websocket.Conn) {
+	var err error
+	for {
+		var req Req
+		req.Init()
+		if err = websocket.JSON.Receive(ws, &req); err != nil {
+			break
+		}
+		go c.do(ws, &req)
+	}
+}
+
 func (c *Cyako) do(ws *websocket.Conn, req *Req) {
 	var err error
 

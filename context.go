@@ -22,6 +22,7 @@ import (
 )
 
 type temp map[string]interface{} // use for middleware maintain state
+
 func (t *temp) getRealKey(scope, key string) string {
 	return scope + "." + key
 }

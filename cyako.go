@@ -56,19 +56,6 @@ type Cyako struct {
 	ProcessorMap map[string]*Processor
 }
 
-// return a http.Handler
-func (c *Cyako) Server(ws *websocket.Conn) {
-	var err error
-	for {
-		var req Req
-		req.Init()
-		if err = websocket.JSON.Receive(ws, &req); err != nil {
-			break
-		}
-		go c.do(ws, &req)
-	}
-}
-
 func (c *Cyako) loadConfig() {
 	var err error
 	data, err := ioutil.ReadFile("config.json")
