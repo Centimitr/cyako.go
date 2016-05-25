@@ -85,7 +85,7 @@ func (r *Res) Init() {
 }
 
 func (c *Ctx) Init() {
-	c.Middleware = msg.Middleware.Map
+	c.Middleware = cyako.Middleware.Map
 	c.Params = make(map[string]string)
 	c.reqParams = make(map[string]interface{})
 	c.parseParams()
