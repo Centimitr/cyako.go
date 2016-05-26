@@ -32,13 +32,17 @@ type Processor struct {
 	Func    func(*Ctx) []reflect.Value
 }
 
+func isMethodMatch(key, suffix string) bool {
+	return strings.HasSuffix(key, suffix)
+}
+
 // Client use a part of the table's key (usually is ProcessorName) to match a processor.
 // Currently, the key is "PkgName.ProcessorName" so team members should use different package names to do a replacement though their package path is not the same.
-func (c *Cyako) matchProcessor(suffix string) (func(*Ctx) []reflect.Value, error) {
+func (c *Cyako) matchProcessor(reqMethodStr string) (func(*Ctx) []reflect.Value, error) {
 	matchedList := []string{}
 	// key is "PkgName.ProcessorName"
 	for key, _ := range c.ProcessorMap {
-		if strings.HasSuffix(key, suffix) {
+		if isMethodMatch(key, reqMethodStr) {
 			matchedList = append(matchedList, key)
 		}
 	}

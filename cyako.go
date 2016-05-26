@@ -17,7 +17,6 @@ package cyako
 import (
 	"encoding/json"
 	"fmt"
-	"golang.org/x/net/websocket"
 	"io/ioutil"
 )
 
