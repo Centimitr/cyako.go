@@ -175,6 +175,8 @@ func (c *Ctx) setResParams() {
 	// 	}
 	// 	return "{" + strings.Join(kvs, ",") + "}"
 	// }
+
+	// will be replaced with mature convert solution, here is a temporary process
 	var stringMapPartlyMarshal = func(m map[string]string, keys []string) (string, error) {
 		var kvs []string
 		var err error
