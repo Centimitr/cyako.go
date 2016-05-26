@@ -67,6 +67,27 @@ func (c *Cyako) loadConfig() {
 	}
 }
 
+func (c *Cyako) PrintLoadInfo() {
+	fmt.Println()
+	fmt.Println(" Loading...")
+
+	fmt.Printf("\n %-35s %-21s %-10s %-10s\n", "Config", "Name", "Key", "Value")
+	for _, config := range c.Config.Middleware {
+		fmt.Printf(" %-35s %-21s %-10s %-10s\n", "Middleware", config.Name, config.Key, config.Value)
+	}
+
+	fmt.Printf("\n %-35s %-10s %-10s %-10s %-10s %-10s\n", "Middleware", "AR", "BP", "AP", "BS", "AS")
+	for _, c := range c.Middleware.Support {
+		fmt.Printf(" %-35s %-10v %-10v %-10v %-10v %-10v\n", c.Name, c.AfterReceive, c.BeforeProcess, c.AfterProcess, c.BeforeSend, c.AfterSend)
+	}
+
+	fmt.Printf("\n %-35s %-10s %-40s\n", "API", "Module", "Package Path")
+	for _, proc := range c.ProcessorMap {
+		fmt.Printf(" %-35s %-10s %-40s\n", proc.Module+"."+proc.Name, proc.Module, proc.PkgPath)
+	}
+	fmt.Println()
+}
+
 /*
 	init
 */

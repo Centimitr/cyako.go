@@ -24,8 +24,13 @@ import (
 	middleware hooked methods
 */
 
+const (
+	TEMP_SCOPE           = "Statistics"
+	TEMP_KEY_TIME_RECORD = "RequestReceivedTime"
+)
+
 func (s StatisticsMap) AfterReceive(req *cyako.Req) {
-	req.Temp.Put("Stat", "start", time.Now())
+	req.Temp.Put(TEMP_SCOPE, TEMP_KEY_TIME_RECORD, time.Now())
 	s.recordReq(req.Method)
 }
 
@@ -40,7 +45,7 @@ func (s StatisticsMap) BeforeSend(res *cyako.Res) {
 }
 
 func (s StatisticsMap) AfterSend(res *cyako.Res) {
-	t := res.Temp.Get("Stat", "start").(time.Time)
+	t := res.Temp.Get(TEMP_SCOPE, TEMP_KEY_TIME_RECORD).(time.Time)
 	duration := time.Now().Sub(t)
 	s.recordResAndStat(res.Method, duration)
 }
