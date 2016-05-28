@@ -88,6 +88,20 @@ func (c *Cyako) PrintLoadInfo() {
 	fmt.Println()
 }
 
+func (c *Cyako) PrintAPIDoc() {
+	type APIDoc struct {
+		ParamConfigs ParamConfigs `json:"ParamConfigs"`
+	}
+	var doc APIDoc
+	for _, proc := range c.ProcessorMap {
+		var ctx *Ctx
+		proc(ctx)
+		doc.ParamConfigs = ParamConfigs
+	}
+	bytes, _ := json.Marshal(doc)
+	fmt.Println(bytes)
+}
+
 /*
 	init
 */

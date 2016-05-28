@@ -53,23 +53,24 @@ type Res struct {
 }
 
 type Ctx struct {
-	res        *Res
-	req        *Req
-	reqParams  map[string]interface{}
-	echoParams []string
-	Method     string
-	Middleware map[string]interface{}
-	Params     map[string]string
-	Data       string
-	Error      CtxError
-	Temp       temp // use for middleware maintain state
+	res          *Res
+	req          *Req
+	reqParams    map[string]interface{}
+	ParamConfigs []*ParamConfig
+	echoParams   []string
+	Method       string
+	Middleware   map[string]interface{}
+	Params       map[string]string
+	Data         string
+	Error        CtxError
+	Temp         temp // use for middleware maintain state
 }
 
 type ParamConfig struct {
-	Key      string
-	Required bool
-	Default  string
-	Echo     bool
+	Key      string `json:"Key"`
+	Required bool   `json:"Required"`
+	Default  string `json:"Default"`
+	Echo     bool   `json:"Echo"`
 }
 
 /*
@@ -132,6 +133,8 @@ func (c *Ctx) getReqParamString(key string) string {
 
 func (c *Ctx) Set(data interface{}) {
 	var setWitchConfig = func(p *ParamConfig) {
+		// add paramConfig to context for docgen etc.
+		c.ParamConfigs = append(c.ParamConfigs, p)
 		switch {
 		case p.Echo:
 			c.echoParams = append(c.echoParams, p.Key)
