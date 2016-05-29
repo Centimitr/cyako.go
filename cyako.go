@@ -59,11 +59,12 @@ func (c *Cyako) loadConfig() {
 	var err error
 	data, err := ioutil.ReadFile("config.json")
 	if err != nil {
-		fmt.Println("Read config file error:", err)
-	}
-	err = json.Unmarshal(data, &c.Config)
-	if err != nil {
-		fmt.Println("Unmarshal config file content error:", err)
+		fmt.Println(" Error config.json:", err)
+	} else {
+		err = json.Unmarshal(data, &c.Config)
+		if err != nil {
+			fmt.Println(" Error config.json:", err)
+		}
 	}
 }
 
@@ -89,17 +90,43 @@ func (c *Cyako) PrintLoadInfo() {
 }
 
 func (c *Cyako) PrintAPIDoc() {
+	type method struct {
+		ParamConfigs []*ParamConfig `json:"ParamConfigs"`
+		Processor
+	}
 	type APIDoc struct {
-		ParamConfigs ParamConfigs `json:"ParamConfigs"`
+		Methods map[string]method `json:"method"`
 	}
-	var doc APIDoc
-	for _, proc := range c.ProcessorMap {
-		var ctx *Ctx
-		proc(ctx)
-		doc.ParamConfigs = ParamConfigs
+	doc := &APIDoc{
+		Methods: make(map[string]method),
 	}
-	bytes, _ := json.Marshal(doc)
-	fmt.Println(bytes)
+	for methodName, proc := range c.ProcessorMap {
+		req := &Req{}
+		req.Init()
+		res := &Res{Id: req.Id, Method: req.Method, Temp: req.Temp}
+		ctx := &Ctx{res: res, req: req, Method: req.Method, Data: req.Data, Temp: req.Temp}
+		res.Init()
+		ctx.Init()
+		proc.Func(ctx)
+		doc.Methods[methodName] = method{
+			ParamConfigs: ctx.ParamConfigs,
+			Processor:    *proc,
+		}
+	}
+	// bytes, err := json.Marshal(doc)
+	// if err != nil {
+	// 	fmt.Println(" Error APIDoc:", err)
+	// }
+	// fmt.Println(string(bytes))
+	fmt.Println()
+	fmt.Printf("\n %-35s %-10s %-40s\n", "API Detail", "Module", "Package Path")
+	for _, proc := range doc.Methods {
+		fmt.Printf(" %-35s %-10s %-40s\n", proc.Module+"."+proc.Name, proc.Module, proc.PkgPath)
+		for _, cfg := range proc.ParamConfigs {
+			fmt.Printf(" -%-10s %+v\n", cfg.Key, *cfg)
+		}
+	}
+	fmt.Println()
 }
 
 /*
