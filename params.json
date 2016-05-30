@@ -1,0 +1,6 @@
+{
+  "name": "Cyako.go",
+  "tagline": "Cyako in golang backend",
+  "body": "# Cyako.go\r\n[![Build Status](https://travis-ci.org/Cyako/Cyako.go.svg?branch=master)](https://travis-ci.org/Cyako/Cyako.go)\r\n\r\nCyako in golang backend. Work in progress.\r\n\r\n Still in a very early stage.\r\n\r\n- [x] middleware support\r\n- [ ] authentication middleware\r\n- [ ] cache middleware\r\n- [ ] reconnect issues\r\n- [ ] realtime app apis\r\n- [ ] examples and guides",
+  "note": "Don't delete this file! It's used internally to help with page regeneration."
+}
