@@ -18,22 +18,33 @@ import (
 	"encoding/json"
 	"fmt"
 	"golang.org/x/net/websocket"
+	"net/http"
 )
 
+func (c *Cyako) Run(addr, pattern string) error {
+	c.Handle(pattern)
+	return http.ListenAndServe(addr, nil)
+}
+
 // return a http.Handler
+func (c *Cyako) Handle(pattern string) {
+	http.Handle(pattern, websocket.Handler(c.Server))
+}
+
 func (c *Cyako) Server(ws *websocket.Conn) {
 	var err error
 	for {
 		var req Req
 		req.Init()
 		if err = websocket.JSON.Receive(ws, &req); err != nil {
+			fmt.Println("RECEIVE ERR:", err)
 			break
 		}
-		go c.do(ws, &req)
+		go c.handle(ws, &req)
 	}
 }
 
-func (c *Cyako) do(ws *websocket.Conn, req *Req) {
+func (c *Cyako) handle(ws *websocket.Conn, req *Req) {
 	var err error
 
 	// Phase I: AfterReceive
@@ -62,7 +73,7 @@ func (c *Cyako) do(ws *websocket.Conn, req *Req) {
 	// Phase IV: AfterProcess
 	// - global, ctx relative methods
 	c.AfterProcess(ctx)
-	// - mainly do response relative tasks
+	// - mainly handle response relative tasks
 	// res.Data = ctx.Data
 	data, err := json.Marshal(ctx.Data)
 	if err != nil {
@@ -77,7 +88,7 @@ func (c *Cyako) do(ws *websocket.Conn, req *Req) {
 	// Phase VI: Send
 	// - send
 	if err := websocket.JSON.Send(ws, res); err != nil {
-		fmt.Println("SEND ERROR.", err)
+		// fmt.Println("SEND ERR:", err)
 		return
 	}
 

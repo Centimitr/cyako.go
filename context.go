@@ -49,7 +49,7 @@ type Res struct {
 	Params string `json:"params"`
 	Data   string `json:"data"`
 	Error  string `json:"error"`
-	Temp   temp   // use for middleware maintain state
+	Temp   temp   `json:"-"` // use for middleware maintain state
 }
 
 type Ctx struct {

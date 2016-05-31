@@ -89,6 +89,10 @@ func (c *Cyako) PrintLoadInfo() {
 	fmt.Println()
 }
 
+func mock() {
+
+}
+
 func (c *Cyako) PrintAPIDoc() {
 	type method struct {
 		ParamConfigs []*ParamConfig `json:"ParamConfigs"`
