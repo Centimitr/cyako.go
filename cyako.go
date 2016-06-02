@@ -18,6 +18,7 @@ import (
 	"encoding/json"
 	"fmt"
 	"io/ioutil"
+	"net/http"
 )
 
 type middlewareConfig struct {
@@ -53,6 +54,7 @@ type Cyako struct {
 	Config       config
 	Middleware   middleware
 	ProcessorMap map[string]*Processor
+	// Server       http.Server
 }
 
 func (c *Cyako) loadConfig() {
