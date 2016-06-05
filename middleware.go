@@ -17,13 +17,22 @@ package cyako
 import (
 	"fmt"
 	"reflect"
+	"strings"
 )
+
+func getName(t reflect.Type) string {
+	if strings.HasPrefix(t.String(), "*") {
+		return strings.Split(t.String(), ".")[1]
+	} else {
+		return t.Name()
+	}
+}
 
 // middleware packages use LoadMiddleware to load itself
 func (c *Cyako) loadMiddleware(x interface{}) {
 	v := reflect.ValueOf(x)
 	t := v.Type()
-	middlewareName := t.Name()
+	middlewareName := getName(t)
 	c.Middleware.Map[middlewareName] = x
 	var support = middlewareSupport{
 		Name: middlewareName,

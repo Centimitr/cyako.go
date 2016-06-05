@@ -12,7 +12,7 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-package jsonbase
+package realtime
 
 import (
 	cyako "github.com/Cyako/Cyako.go"
@@ -22,28 +22,19 @@ import (
 	middleware hooked methods
 */
 
-// func (j JSONBase) AfterReceive(req *cyako.Req) {
-// }
-
-// func (j JSONBase) BeforeProcess(ctx *cyako.Ctx) {
-// }
-
-// func (j JSONBase) AfterProcess(ctx *cyako.Ctx) {
-// }
-
-// func (j JSONBase) BeforeSend(res *cyako.Res) {
-
-// }
-
-// func (j JSONBase) AfterSend(res *cyako.Res) {
-// }
-
 /*
 	init
 */
 
+type Realtime struct {
+	RealtimeManager
+}
+
 func init() {
-	cyako.LoadMiddleware(RealtimeManager{
-		ListernList: make(map[string][]Listener),
-	})
+	r := Realtime{
+		RealtimeManager{
+			List: make(map[string][]Listener),
+		},
+	}
+	cyako.LoadMiddleware(&r)
 }
