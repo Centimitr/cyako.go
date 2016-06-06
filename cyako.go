@@ -21,17 +21,17 @@ import (
 	// "net/http"
 )
 
-type middlewareConfig struct {
+type serviceConfig struct {
 	Name  string `json:"name"`
 	Key   string `json:"key"`
 	Value string `json:"value"`
 }
 
 type config struct {
-	Middleware []middlewareConfig `json:"middleware"`
+	Service []serviceConfig `json:"service"`
 }
 
-type middlewareSupport struct {
+type serviceSupport struct {
 	Name          string
 	AfterReceive  bool
 	BeforeProcess bool
@@ -40,9 +40,9 @@ type middlewareSupport struct {
 	AfterSend     bool
 }
 
-type middleware struct {
+type service struct {
 	Map               map[string]interface{}
-	Support           []middlewareSupport
+	Support           []serviceSupport
 	AfterReceiveFunc  []func(*Req)
 	BeforeProcessFunc []func(*Ctx)
 	AfterProcessFunc  []func(*Ctx)
@@ -52,7 +52,7 @@ type middleware struct {
 
 type Cyako struct {
 	Config       config
-	Middleware   middleware
+	Service      service
 	ProcessorMap map[string]*Processor
 	// Server       http.Server
 }
@@ -75,12 +75,12 @@ func (c *Cyako) PrintLoadInfo() {
 	fmt.Println(" Loading...")
 
 	fmt.Printf("\n %-35s %-21s %-10s %-10s\n", "Config", "Name", "Key", "Value")
-	for _, config := range c.Config.Middleware {
-		fmt.Printf(" %-35s %-21s %-10s %-10s\n", "Middleware", config.Name, config.Key, config.Value)
+	for _, config := range c.Config.Service {
+		fmt.Printf(" %-35s %-21s %-10s %-10s\n", "Service", config.Name, config.Key, config.Value)
 	}
 
-	fmt.Printf("\n %-35s %-10s %-10s %-10s %-10s %-10s\n", "Middleware", "AR", "BP", "AP", "BS", "AS")
-	for _, c := range c.Middleware.Support {
+	fmt.Printf("\n %-35s %-10s %-10s %-10s %-10s %-10s\n", "Service", "AR", "BP", "AP", "BS", "AS")
+	for _, c := range c.Service.Support {
 		fmt.Printf(" %-35s %-10v %-10v %-10v %-10v %-10v\n", c.Name, c.AfterReceive, c.BeforeProcess, c.AfterProcess, c.BeforeSend, c.AfterSend)
 	}
 
@@ -88,14 +88,28 @@ func (c *Cyako) PrintLoadInfo() {
 	for _, proc := range c.ProcessorMap {
 		fmt.Printf(" %-35s %-10s %-40s\n", proc.Module+"."+proc.Name, proc.Module, proc.PkgPath)
 	}
-	fmt.Println()
 }
 
 func mock() {
 
 }
 
+func (c *Cyako) CheckModule() {
+	fmt.Println()
+	fmt.Println(" Checking...")
+	for _, proc := range c.ProcessorMap {
+		req := &Req{}
+		req.Init()
+		res := &Res{Id: req.Id, Method: req.Method, Temp: req.Temp}
+		ctx := &Ctx{res: res, req: req, Method: req.Method, Data: req.Data, Temp: req.Temp}
+		res.Init()
+		ctx.Init()
+		proc.Func(ctx)
+	}
+}
+
 func (c *Cyako) PrintAPIDoc() {
+	fmt.Println()
 	type method struct {
 		ParamConfigs []*ParamConfig `json:"ParamConfigs"`
 		Processor
@@ -143,7 +157,7 @@ var cyako *Cyako
 
 func init() {
 	cyako = &Cyako{
-		Middleware: middleware{
+		Service: service{
 			Map: make(map[string]interface{}),
 		},
 		ProcessorMap: make(map[string]*Processor),
@@ -160,12 +174,23 @@ func Ins() *Cyako {
 	return cyako
 }
 
-// used in Processor Module package to load itself
-func LoadModule(x interface{}) {
-	cyako.loadModule(x)
+// Svc is an alias to Ins().Service.Map
+var Svc map[string]interface{}
+
+// Service is an alias to Ins().Service.Map
+var Service map[string]interface{}
+
+func init() {
+	Svc = Ins().Service.Map
+	Service = Ins().Service.Map
 }
 
-// used in Middleware package to load itself
-func LoadMiddleware(x interface{}) {
-	cyako.loadMiddleware(x)
+// used in Processor Module package to load itself
+func LoadModule(x interface{}) {
+	Ins().loadModule(x)
+}
+
+// used in Service package to load itself
+func LoadService(x interface{}) {
+	Ins().loadService(x)
 }

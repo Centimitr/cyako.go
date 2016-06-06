@@ -19,7 +19,7 @@ import (
 )
 
 /*
-	middleware hooked methods
+	service hooked methods
 */
 
 /*
@@ -36,5 +36,5 @@ func init() {
 			List: make(map[string][]Listener),
 		},
 	}
-	cyako.LoadMiddleware(&r)
+	cyako.LoadService(&r)
 }

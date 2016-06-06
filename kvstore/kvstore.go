@@ -49,5 +49,5 @@ func init() {
 			m: make(map[string]interface{}),
 		},
 	}
-	cyako.LoadMiddleware(kvstore)
+	cyako.LoadService(kvstore)
 }

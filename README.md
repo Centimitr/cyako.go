@@ -5,9 +5,9 @@ Cyako in golang backend. Work in progress.
 
  Still in a very early stage.
 
-- [x] middleware support
-- [ ] authentication middleware
-- [ ] cache middleware
+- [x] service support
+- [ ] authentication service
+- [ ] cache service
 - [ ] reconnect issues
 - [ ] realtime app apis
 - [ ] examples and guides

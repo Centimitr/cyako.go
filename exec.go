@@ -58,7 +58,7 @@ func (c *Cyako) handle(ws *websocket.Conn, req *Req) {
 
 	// Phase II: BeforeProcess
 	// - global, ctx relative methods
-	// - provide chance to manipulate context object for middlewares
+	// - provide chance to manipulate context object for services
 	c.BeforeProcess(ctx)
 
 	// Phase III: Process

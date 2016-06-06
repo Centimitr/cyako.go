@@ -26,8 +26,12 @@ import (
 // 	Set(string)
 // }
 
+type dep struct {
+	KVStore *kvstore.KVStore
+}
+
 type SpecValue struct {
-	kvstore *kvstore.KVStore
+	Dependences dep
 }
 
 func (s *SpecValue) SetInt(key string) {
@@ -40,12 +44,14 @@ func (s *SpecValue) GetInt(key string) {
 
 func init() {
 	specValue := &SpecValue{
-		kvstore: cyako.Ins().Middleware.Map["KVStore"].(*kvstore.KVStore),
+		Dependences: dep{
+			KVStore: cyako.Svc["KVStore"].(*kvstore.KVStore),
+		},
 	}
-	cyako.LoadMiddleware(specValue)
+	cyako.LoadService(specValue)
 	// type SpecValue2 SpecValue
 	// specValue2 := &SpecValue2{
-	// 	kvstore: cyako.Ins().Middleware.Map["KVStore"].(*kvstore.KVStore),
+	// 	kvstore: cyako.Ins().Service.Map["KVStore"].(*kvstore.KVStore),
 	// }
-	// cyako.LoadMiddleware(specValue2)
+	// cyako.LoadService(specValue2)
 }

@@ -19,7 +19,7 @@ import (
 )
 
 /*
-	middleware hooked methods
+	service hooked methods
 */
 
 // func (j JSONBase) AfterReceive(req *cyako.Req) {
@@ -43,5 +43,5 @@ import (
 */
 
 func init() {
-	cyako.LoadMiddleware(JSONBase{})
+	cyako.LoadService(JSONBase{})
 }

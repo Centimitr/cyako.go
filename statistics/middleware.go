@@ -21,7 +21,7 @@ import (
 )
 
 /*
-	middleware hooked methods
+	service hooked methods
 */
 
 const (
@@ -54,13 +54,13 @@ func (s StatisticsMap) AfterSend(res *cyako.Res) {
 	init
 */
 
-// use struct Statistics to combime the middleware, so Statistics is the middleware name.
+// use struct Statistics to combime the service, so Statistics is the service name.
 type Statistics struct {
 	StatisticsMap
 }
 
 func init() {
-	cyako.LoadMiddleware(Statistics{
+	cyako.LoadService(Statistics{
 		StatisticsMap{
 			methodMap: make(map[string]*StatisticsItem),
 		},

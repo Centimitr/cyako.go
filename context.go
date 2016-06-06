@@ -21,7 +21,7 @@ import (
 	"strings"
 )
 
-type temp map[string]interface{} // use for middleware maintain state
+type temp map[string]interface{} // use for service maintain state
 
 func (t *temp) getRealKey(scope, key string) string {
 	return scope + "." + key
@@ -40,7 +40,7 @@ type Req struct {
 	Method string `json:"method"`
 	Params string `json:"params"`
 	Data   string `json:"data"`
-	Temp   temp   // use for middleware maintain state
+	Temp   temp   // use for service maintain state
 }
 
 type Res struct {
@@ -49,7 +49,7 @@ type Res struct {
 	Params string `json:"params"`
 	Data   string `json:"data"`
 	Error  string `json:"error"`
-	Temp   temp   `json:"-"` // use for middleware maintain state
+	Temp   temp   `json:"-"` // use for service maintain state
 }
 
 type Ctx struct {
@@ -59,11 +59,11 @@ type Ctx struct {
 	ParamConfigs []*ParamConfig
 	echoParams   []string
 	Method       string
-	Middleware   map[string]interface{}
+	Service      map[string]interface{}
 	Params       map[string]string
 	Data         string
 	Error        CtxError
-	Temp         temp // use for middleware maintain state
+	Temp         temp // use for service maintain state
 }
 
 type ParamConfig struct {
@@ -101,7 +101,7 @@ func (r *Res) Init() {
 }
 
 func (c *Ctx) Init() {
-	c.Middleware = cyako.Middleware.Map
+	c.Service = cyako.Service.Map
 	c.Params = make(map[string]string)
 	c.reqParams = make(map[string]interface{})
 	c.parseParams()
