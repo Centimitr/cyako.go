@@ -14,28 +14,38 @@
 
 package specvalue
 
+import (
+	cyako "github.com/Cyako/Cyako.go"
+	"github.com/Cyako/Cyako.go/kvstore"
+)
+
 // Specific values include: string/struct sets or lists.
 
+// type Interface interface{
+// 	Get(string)
+// 	Set(string)
+// }
+
 type SpecValue struct {
-	data map[string]interface{}
+	kvstore *kvstore.KVStore
 }
 
-func (s *SpecValue) Get(key string) interface{} {
-	return s.data[key]
+func (s *SpecValue) SetInt(key string) {
+
 }
 
-func (s *SpecValue) Set(key string, value interface{}) {
-	s.data[key] = value
+func (s *SpecValue) GetInt(key string) {
+
 }
 
-type SpecValueType interface {
-	Provide(interface{}) interface{}
-	Match(interface{}, interface{}) bool
-}
-
-func (s *SpecValue) Provide(key string, t SpecValueType) {
-	return t.Provide(s.Get(key))
-}
-func (s *SpecValue) Match(key string, value interface{}, t SpecValueType) bool {
-	return t.Match(s.Get(key), value)
+func init() {
+	specValue := &SpecValue{
+		kvstore: cyako.Ins().Middleware.Map["KVStore"].(*kvstore.KVStore),
+	}
+	cyako.LoadMiddleware(specValue)
+	// type SpecValue2 SpecValue
+	// specValue2 := &SpecValue2{
+	// 	kvstore: cyako.Ins().Middleware.Map["KVStore"].(*kvstore.KVStore),
+	// }
+	// cyako.LoadMiddleware(specValue2)
 }

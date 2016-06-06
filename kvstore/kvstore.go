@@ -12,22 +12,42 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-package cache
+package kvstore
 
 import (
+	// "fmt"
 	cyako "github.com/Cyako/Cyako.go"
 )
 
-type Cache struct{}
-
-func (c Cache) BeforeProcess(ctx *cyako.Ctx) {
-
+type Interfacce interface {
+	Get(string) interface{}
+	Set(string, interface{})
+	Delete(string)
+	Disactive()
+	Active()
 }
 
-func (c Cache) AfterProcess(ctx *cyako.Ctx) {
+type KVStore struct {
+	Interfacce
+}
 
+func GetScopedKeyString(scope, name string) string {
+	return scope + "." + name
+}
+
+func (k *KVStore) GetWithScoped(scope, name string) interface{} {
+	return k.Get(GetScopedKeyString(scope, name))
+}
+
+func (k *KVStore) SetWithScoped(scope, name string, value interface{}) {
+	k.Set(GetScopedKeyString(scope, name), value)
 }
 
 func init() {
-	cyako.LoadMiddleware(Cache{})
+	kvstore := &KVStore{
+		MemoryKVStore{
+			m: make(map[string]interface{}),
+		},
+	}
+	cyako.LoadMiddleware(kvstore)
 }
