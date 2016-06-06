@@ -18,6 +18,7 @@ import (
 	"encoding/json"
 	"errors"
 	"fmt"
+	"golang.org/x/net/websocket"
 	"strings"
 )
 
@@ -53,6 +54,7 @@ type Res struct {
 }
 
 type Ctx struct {
+	Conn         *websocket.Conn
 	res          *Res
 	req          *Req
 	reqParams    map[string]interface{}

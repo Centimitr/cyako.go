@@ -15,28 +15,62 @@
 package realtime
 
 import (
-	// "fmt"
+	cyako "github.com/Cyako/Cyako.go"
+	"github.com/Cyako/Cyako.go/kvstore"
+
 	"golang.org/x/net/websocket"
-	"sync"
 )
 
+/*
+	define
+*/
+type dep struct {
+	KVStore *kvstore.KVStore
+}
+
 type Listener struct {
-	ws *websocket.Conn
+	Conn *websocket.Conn
 }
 
-type RealtimeManager struct {
-	mutex sync.RWMutex
-	List  map[string][]Listener
+func (l *Listener) Receive(res *cyako.Res) {
+	if err := websocket.JSON.Send(l.Conn, res); err != nil {
+		// fmt.Println("SEND ERR:", err)
+		return
+	}
 }
 
-func (r *RealtimeManager) addListener(listName string, ls Listener) {
-	r.mutex.Lock()
-	defer r.mutex.Unlock()
-	r.List[listName] = append(r.List[listName], ls)
+type Realtime struct {
+	Dependences dep
 }
 
-// stap
-func (r *RealtimeManager) removeListener(listName string, ls Listener) {
-	r.mutex.Lock()
-	defer r.mutex.Unlock()
+func (r *Realtime) AddListener(groupName string, conn *websocket.Conn) {
+	kvstore := r.Dependences.KVStore
+	listeners := kvstore.GetWithScoped("realtime.listnerGroups", groupName).([]Listener)
+	listeners = append(listeners, Listener{Conn: conn})
+	kvstore.SetWithScoped("realtime.listnerGroups", groupName, listeners)
+}
+
+func (r *Realtime) Send(groupName string, res *cyako.Res) {
+	kvstore := r.Dependences.KVStore
+	listeners := kvstore.GetWithScoped("realtime.listnerGroups", groupName).([]Listener)
+	for _, listener := range listeners {
+		listener.Receive(res)
+	}
+}
+
+/*
+	service hooked methods
+*/
+
+/*
+	init
+*/
+
+func init() {
+	r := &Realtime{
+		Dependences: dep{
+			KVStore: cyako.Svc["KVStore"].(*kvstore.KVStore),
+		},
+	}
+	cyako.LoadService(r)
 }
