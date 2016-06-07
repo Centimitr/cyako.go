@@ -22,6 +22,7 @@ import (
 type Interfacce interface {
 	Get(string) interface{}
 	Set(string, interface{})
+	Has(string) bool
 	Delete(string)
 	Disactive()
 	Active()
@@ -41,6 +42,14 @@ func (k *KVStore) GetWithScoped(scope, name string) interface{} {
 
 func (k *KVStore) SetWithScoped(scope, name string, value interface{}) {
 	k.Set(GetScopedKeyString(scope, name), value)
+}
+
+func (k *KVStore) HasWithScoped(scope, name string) bool {
+	return k.Has(GetScopedKeyString(scope, name))
+}
+
+func (k *KVStore) DeleteWithScoped(scope, name string) {
+	k.Delete(GetScopedKeyString(scope, name))
 }
 
 func init() {
