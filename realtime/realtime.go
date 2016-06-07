@@ -47,7 +47,7 @@ type Realtime struct {
 }
 
 // realtime use the prefix to store data in KVStore
-const KVSTORE_SCOPE_LISTENER_GROUPS = "realtime.listnerGroups"
+const KVSTORE_SCOPE_LISTENER_GROUPS = "service.realtime.listnerGroups"
 
 // This method add specific *websocket.Conn to listeners list
 func (r *Realtime) AddListener(groupName string, conn *websocket.Conn) {
@@ -71,10 +71,6 @@ func (r *Realtime) Send(groupName string, res *cyako.Res) {
 		listener.Receive(res)
 	}
 }
-
-/*
-	service hooked methods
-*/
 
 /*
 	init

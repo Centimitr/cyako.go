@@ -18,41 +18,41 @@ import (
 	"sync"
 )
 
-type MemoryKVStore struct {
+type Memory struct {
 	mutex sync.RWMutex
 	m     map[string]interface{}
 }
 
-func (s MemoryKVStore) Get(key string) interface{} {
+func (s Memory) Get(key string) interface{} {
 	s.mutex.RLock()
 	defer s.mutex.RUnlock()
 	return s.m[key]
 }
 
-func (s MemoryKVStore) Set(key string, value interface{}) {
+func (s Memory) Set(key string, value interface{}) {
 	s.mutex.Lock()
 	defer s.mutex.Unlock()
 	s.m[key] = value
 }
-func (s MemoryKVStore) Has(key string) bool {
+func (s Memory) Has(key string) bool {
 	s.mutex.RLock()
 	defer s.mutex.RUnlock()
 	_, ok := s.m[key]
 	return ok
 }
 
-func (s MemoryKVStore) Delete(key string) {
+func (s Memory) Delete(key string) {
 	s.mutex.Lock()
 	defer s.mutex.Unlock()
 	delete(s.m, key)
 }
 
-func (s MemoryKVStore) Disactive() {
+func (s Memory) Disactive() {
 	s.mutex.Lock()
 	defer s.mutex.Unlock()
 }
 
-func (s MemoryKVStore) Active() {
+func (s Memory) Active() {
 	s.mutex.Lock()
 	defer s.mutex.Unlock()
 }

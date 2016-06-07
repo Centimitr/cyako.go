@@ -49,20 +49,3 @@ func (s StatisticsMap) AfterSend(res *cyako.Res) {
 	duration := time.Now().Sub(t)
 	s.recordResAndStat(res.Method, duration)
 }
-
-/*
-	init
-*/
-
-// use struct Statistics to combime the service, so Statistics is the service name.
-type Statistics struct {
-	StatisticsMap
-}
-
-func init() {
-	cyako.LoadService(Statistics{
-		StatisticsMap{
-			methodMap: make(map[string]*StatisticsItem),
-		},
-	})
-}

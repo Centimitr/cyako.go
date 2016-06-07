@@ -54,7 +54,7 @@ func (k *KVStore) DeleteWithScoped(scope, name string) {
 
 func init() {
 	kvstore := &KVStore{
-		MemoryKVStore{
+		Memory{
 			m: make(map[string]interface{}),
 		},
 	}

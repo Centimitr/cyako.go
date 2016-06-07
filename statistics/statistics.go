@@ -38,7 +38,7 @@ type StatisticsMap struct {
 	private methods
 */
 
-func (s *StatisticsMap) get() {
+func (s *StatisticsMap) Get() {
 	s.mutex.RLock()
 	defer s.mutex.RUnlock()
 	fmt.Printf("\n %-35s %-10s %-10s %-10s %-10s %-10s\n", "API", "Res/Req", "Avg", "Min", "Max", "Last")
@@ -98,4 +98,21 @@ func (s *StatisticsMap) recordResAndStat(method string, duration time.Duration) 
 			LastDuration:  duration,
 		}
 	}
+}
+
+/*
+	init
+*/
+
+// use struct Statistics to combime the service, so Statistics is the service name.
+type Statistics struct {
+	StatisticsMap
+}
+
+func init() {
+	cyako.LoadService(Statistics{
+		StatisticsMap{
+			methodMap: make(map[string]*StatisticsItem),
+		},
+	})
 }

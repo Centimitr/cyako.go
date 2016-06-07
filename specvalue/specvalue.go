@@ -21,11 +21,6 @@ import (
 
 // Specific values include: string/struct sets or lists.
 
-// type Interface interface{
-// 	Get(string)
-// 	Set(string)
-// }
-
 type dep struct {
 	KVStore *kvstore.KVStore
 }
@@ -34,14 +29,45 @@ type SpecValue struct {
 	Dependences dep
 }
 
-func (s *SpecValue) SetInt(key string) {
+// storage manipulations
 
+const KVSTORE_SCOPE_SPECVALUE = "service.specvalue.storage"
+
+func (s *SpecValue) Set(key string, value interface{}) {
+	kvstore := s.Dependences.KVStore
+	kvstore.SetWithScoped(KVSTORE_SCOPE_SPECVALUE, key, value)
 }
 
-func (s *SpecValue) GetInt(key string) {
-
+type Value struct {
+	Value interface{}
 }
 
+func (s *SpecValue) Get(key string) *Value {
+	kvstore := s.Dependences.KVStore
+	return &Value{Value: kvstore.GetWithScoped(KVSTORE_SCOPE_SPECVALUE, key)}
+}
+
+type MatchFunc (func(interface{}, interface{}) bool)
+
+func (v *Value) MatchFunc(value interface{}, fn MatchFunc) bool {
+	return fn(v.Value, value)
+}
+
+// match methods
+
+func (v *Value) HasInt(value interface{}) bool {
+	return HasInt(v.Value, value)
+}
+
+func (v *Value) HasFloat(value interface{}) bool {
+	return HasFloat(v.Value, value)
+}
+
+func (v *Value) HasString(value interface{}) bool {
+	return HasString(v.Value, value)
+}
+
+// init
 func init() {
 	specValue := &SpecValue{
 		Dependences: dep{
@@ -49,9 +75,4 @@ func init() {
 		},
 	}
 	cyako.LoadService(specValue)
-	// type SpecValue2 SpecValue
-	// specValue2 := &SpecValue2{
-	// 	kvstore: cyako.Ins().Service.Map["KVStore"].(*kvstore.KVStore),
-	// }
-	// cyako.LoadService(specValue2)
 }
