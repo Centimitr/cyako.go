@@ -15,7 +15,7 @@
 package cyako
 
 import (
-	"encoding/json"
+	// "encoding/json"
 	"fmt"
 	"golang.org/x/net/websocket"
 	"net/http"
@@ -74,12 +74,12 @@ func (c *Cyako) handle(ws *websocket.Conn, req *Req) {
 	// - global, ctx relative methods
 	c.AfterProcess(ctx)
 	// - mainly handle response relative tasks
-	// res.Data = ctx.Data
-	data, err := json.Marshal(ctx.Data)
-	if err != nil {
-		fmt.Println(err)
-	}
-	res.Data = string(data)
+	res.Data = ctx.Data
+	// data, err := json.Marshal(ctx.Data)
+	// if err != nil {
+	// 	fmt.Println(err)
+	// }
+	// res.Data = string(data)
 	ctx.setResParams()
 
 	// Phase V: BeforeSend

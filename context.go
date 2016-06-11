@@ -15,11 +15,11 @@
 package cyako
 
 import (
-	"encoding/json"
-	"errors"
+	// "encoding/json"
+	// "errors"
 	"fmt"
 	"golang.org/x/net/websocket"
-	"strings"
+	// "strings"
 )
 
 type temp map[string]interface{} // use for service maintain state
@@ -37,20 +37,20 @@ func (t temp) Put(scope, key string, v interface{}) {
 }
 
 type Req struct {
-	Id     string `json:"id"`
-	Method string `json:"method"`
-	Params string `json:"params"`
-	Data   string `json:"data"`
-	Temp   temp   // use for service maintain state
+	Id     string      `json:"id"`
+	Method string      `json:"method"`
+	Params interface{} `json:"params"`
+	Data   interface{} `json:"data"`
+	Temp   temp        // use for service maintain state
 }
 
 type Res struct {
-	Id     string `json:"id"`
-	Method string `json:"method"`
-	Params string `json:"params"`
-	Data   string `json:"data"`
-	Error  string `json:"error"`
-	Temp   temp   `json:"-"` // use for service maintain state
+	Id     string                 `json:"id"`
+	Method string                 `json:"method"`
+	Params map[string]interface{} `json:"params"`
+	Data   interface{}            `json:"data"`
+	Error  interface{}            `json:"error"`
+	Temp   temp                   `json:"-"` // use for service maintain state
 }
 
 type Ctx struct {
@@ -62,8 +62,8 @@ type Ctx struct {
 	echoParams   []string
 	Method       string
 	Service      map[string]interface{}
-	Params       map[string]string
-	Data         string
+	Params       map[string]interface{}
+	Data         interface{}
 	Error        CtxError
 	Temp         temp // use for service maintain state
 }
@@ -100,22 +100,23 @@ func (r *Req) Init() {
 }
 
 func (r *Res) Init() {
+	r.Params = make(map[string]interface{})
 }
 
 func (c *Ctx) Init() {
 	c.Service = cyako.Service.Map
-	c.Params = make(map[string]string)
+	c.Params = make(map[string]interface{})
 	c.reqParams = make(map[string]interface{})
-	c.parseParams()
+	// c.parseParams()
 }
 
-func (c *Ctx) parseParams() {
-	s := c.req.Params
-	err := json.Unmarshal([]byte(s), &c.reqParams)
-	if err != nil {
-		c.Error.NewFatal("Params parse error.")
-	}
-}
+// func (c *Ctx) parseParams() {
+// 	s := c.req.Params
+// 	err := json.Unmarshal([]byte(s), &c.reqParams)
+// 	if err != nil {
+// 		c.Error.NewFatal("Params parse error.")
+// 	}
+// }
 
 /*
 	context methods used in processors
@@ -161,7 +162,7 @@ func (c *Ctx) Set(data interface{}) {
 	}
 }
 
-func (c *Ctx) Get(key string) string {
+func (c *Ctx) Get(key string) interface{} {
 	return c.Params[key]
 }
 
@@ -169,31 +170,40 @@ func (c *Ctx) Get(key string) string {
 	set res
 */
 func (c *Ctx) setResParams() {
-	var toEscaped = func(s string) string {
-		return strings.Replace(s, `"`, `\"`, -1)
-	}
-	// var params []string
-	// var stringMapMarshal = func(m map[string]string) string {
-	// 	var kvs []string
-	// 	for k, v := range m {
-	// 		kvs = append(kvs, `"`+toEscaped(k)+`":"`+toEscaped(v)+`"`)
-	// 	}
-	// 	return "{" + strings.Join(kvs, ",") + "}"
+	// var toEscaped = func(s string) string {
+	// 	return strings.Replace(s, `"`, `\"`, -1)
 	// }
+	// // var params []string
+	// // var stringMapMarshal = func(m map[string]string) string {
+	// // 	var kvs []string
+	// // 	for k, v := range m {
+	// // 		kvs = append(kvs, `"`+toEscaped(k)+`":"`+toEscaped(v)+`"`)
+	// // 	}
+	// // 	return "{" + strings.Join(kvs, ",") + "}"
+	// // }
 
-	// will be replaced with mature convert solution, here is a temporary process
-	var stringMapPartlyMarshal = func(m map[string]string, keys []string) (string, error) {
-		var kvs []string
-		var err error
-		for _, k := range keys {
-			if v, ok := m[k]; ok {
-				kvs = append(kvs, `"`+toEscaped(k)+`":"`+toEscaped(v)+`"`)
-			} else {
-				err = errors.New("Cannot find one given key in the map.")
-			}
+	// // will be replaced with mature convert solution, here is a temporary process
+	// var stringMapPartlyMarshal = func(m map[string]string, keys []string) (string, error) {
+	// 	var kvs []string
+	// 	var err error
+	// 	for _, k := range keys {
+	// 		if v, ok := m[k]; ok {
+	// 			kvs = append(kvs, `"`+toEscaped(k)+`":"`+toEscaped(v)+`"`)
+	// 		} else {
+	// 			err = errors.New("Cannot find one given key in the map.")
+	// 		}
+	// 	}
+	// 	return "{" + strings.Join(kvs, ",") + "}", err
+	// }
+	// json, _ := stringMapPartlyMarshal(c.Params, c.echoParams)
+	// c.res.Params = json
+	// var kvs []string
+	// var err error
+	for _, k := range c.echoParams {
+		if v, ok := c.Params[k]; ok {
+			c.res.Params[k] = v
+		} else {
+			// err = errors.New("EchoParams: Cannot find one given key in the map.")
 		}
-		return "{" + strings.Join(kvs, ",") + "}", err
 	}
-	json, _ := stringMapPartlyMarshal(c.Params, c.echoParams)
-	c.res.Params = json
 }
