@@ -60,6 +60,7 @@ type Ctx struct {
 	reqParams    map[string]interface{}
 	ParamConfigs []*ParamConfig
 	echoParams   []string
+	Id           string
 	Method       string
 	Service      map[string]interface{}
 	Params       map[string]interface{}

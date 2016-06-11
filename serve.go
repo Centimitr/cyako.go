@@ -52,7 +52,7 @@ func (c *Cyako) handle(ws *websocket.Conn, req *Req) {
 	c.AfterReceive(req)
 	// - initial context and response
 	res := &Res{Id: req.Id, Method: req.Method, Temp: req.Temp}
-	ctx := &Ctx{res: res, req: req, Method: req.Method, Data: req.Data, Temp: req.Temp, Conn: ws}
+	ctx := &Ctx{res: res, req: req, Id: req.Id, Method: req.Method, Data: req.Data, Temp: req.Temp, Conn: ws}
 	res.Init()
 	ctx.Init()
 
