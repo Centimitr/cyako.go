@@ -37,11 +37,11 @@ func (t temp) Put(scope, key string, v interface{}) {
 }
 
 type Req struct {
-	Id     string      `json:"id"`
-	Method string      `json:"method"`
-	Params interface{} `json:"params"`
-	Data   interface{} `json:"data"`
-	Temp   temp        // use for service maintain state
+	Id     string                 `json:"id"`
+	Method string                 `json:"method"`
+	Params map[string]interface{} `json:"params"`
+	Data   interface{}            `json:"data"`
+	Temp   temp                   // use for service maintain state
 }
 
 type Res struct {
@@ -54,10 +54,10 @@ type Res struct {
 }
 
 type Ctx struct {
-	Conn         *websocket.Conn
-	res          *Res
-	req          *Req
-	reqParams    map[string]interface{}
+	Conn *websocket.Conn
+	res  *Res
+	req  *Req
+	// reqParams    map[string]interface{}
 	ParamConfigs []*ParamConfig
 	echoParams   []string
 	Id           string
@@ -97,6 +97,7 @@ func (c *CtxError) NewWarn(info string) {
 	init
 */
 func (r *Req) Init() {
+	r.Params = make(map[string]interface{})
 	r.Temp = make(map[string]interface{})
 }
 
@@ -107,7 +108,7 @@ func (r *Res) Init() {
 func (c *Ctx) Init() {
 	c.Service = cyako.Service.Map
 	c.Params = make(map[string]interface{})
-	c.reqParams = make(map[string]interface{})
+	// c.reqParams = make(map[string]interface{})
 	// c.parseParams()
 }
 
@@ -124,31 +125,38 @@ func (c *Ctx) Init() {
 */
 
 func (c *Ctx) getReqParamString(key string) string {
-	switch c.reqParams[key].(type) {
+	// param := c.reqParams[key]
+	param := c.req.Params[key]
+	switch param.(type) {
 	case string:
-		return c.reqParams[key].(string)
+		return param.(string)
 	case float64:
-		return fmt.Sprint(c.reqParams[key].(float64))
+		return fmt.Sprint(param.(float64))
 	default:
 		c.Error.NewWarn(fmt.Sprint("Param type error, not a known type."))
-		return fmt.Sprint(c.reqParams[key])
+		return fmt.Sprint(param)
 	}
 }
 
 func (c *Ctx) Set(data interface{}) {
+	fmt.Println(c.req.Params)
 	var setWitchConfig = func(p *ParamConfig) {
 		// add paramConfig to context for docgen etc.
 		c.ParamConfigs = append(c.ParamConfigs, p)
+		param, isParamExist := c.req.Params[p.Key]
 		switch {
 		case p.Echo:
 			c.echoParams = append(c.echoParams, p.Key)
 			fallthrough
+		case isParamExist:
+			c.Params[p.Key] = param
 		case p.Default != "":
 			c.Params[p.Key] = p.Default
 		case p.Required:
 			c.Error.NewFatal("Lack required param.")
-		default:
-			c.Params[p.Key] = c.getReqParamString(p.Key)
+			// default:
+			// fmt.Print("Key:", c.getReqParamString(p.Key))
+			// c.Params[p.Key] = c.getReqParamString(p.Key)
 		}
 	}
 	switch d := data.(type) {

@@ -29,7 +29,9 @@ type dep struct {
 }
 
 type Listener struct {
-	Conn *websocket.Conn
+	Conn   *websocket.Conn
+	Id     string
+	Method string
 }
 
 func (l *Listener) Receive(res *cyako.Res) {
@@ -50,14 +52,18 @@ type Realtime struct {
 const KVSTORE_SCOPE_LISTENER_GROUPS = "service.realtime.listnerGroups"
 
 // This method add specific *websocket.Conn to listeners list
-func (r *Realtime) AddListener(groupName string, conn *websocket.Conn) {
+func (r *Realtime) AddListener(groupName string, conn *websocket.Conn, id string, method string) {
 	kvstore := r.Dependences.KVStore
 	listeners := []Listener{}
 	if kvstore.HasWithScoped(KVSTORE_SCOPE_LISTENER_GROUPS, groupName) {
 		listeners = kvstore.GetWithScoped(KVSTORE_SCOPE_LISTENER_GROUPS, groupName).([]Listener)
 	}
-	listeners = append(listeners, Listener{Conn: conn})
+	listeners = append(listeners, Listener{Conn: conn, Id: id})
 	kvstore.SetWithScoped(KVSTORE_SCOPE_LISTENER_GROUPS, groupName, listeners)
+}
+
+func (r *Realtime) AddListenerDefault(groupName string, ctx *cyako.Ctx) {
+	r.AddListener(groupName, ctx.Conn, ctx.Id, ctx.Method)
 }
 
 // Send response to listeners in some group
@@ -68,6 +74,8 @@ func (r *Realtime) Send(groupName string, res *cyako.Res) {
 		listeners = kvstore.GetWithScoped(KVSTORE_SCOPE_LISTENER_GROUPS, groupName).([]Listener)
 	}
 	for _, listener := range listeners {
+		res.Id = listener.Id
+		res.Method = listener.Method
 		listener.Receive(res)
 	}
 }
