@@ -15,6 +15,8 @@
 package statistics
 
 import (
+	cyako "github.com/Cyako/Cyako.go"
+
 	"fmt"
 	"sync"
 	"time"

@@ -34,7 +34,7 @@ func (j *JSONBase) Load(c *cyako.Ctx) {
 
 func (j *JSONBase) Save(c *cyako.Ctx) {
 	filename := c.Method
-	err := ioutil.WriteFile(filename+".json", []byte(c.Data), 0777)
+	err := ioutil.WriteFile(filename+".json", []byte(c.Data.(string)), 0777)
 	if err != nil {
 		fmt.Println(err)
 	}
