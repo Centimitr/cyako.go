@@ -17,6 +17,8 @@ package kvstore
 import (
 	// "fmt"
 	cyako "github.com/Cyako/Cyako.go"
+
+	"github.com/Centimitr/namespace"
 )
 
 type Interfacce interface {
@@ -30,6 +32,7 @@ type Interfacce interface {
 
 type KVStore struct {
 	Interfacce
+	Namespace namespace.Namespace
 }
 
 func GetScopedKeyString(scope, name string) string {
@@ -54,9 +57,10 @@ func (k *KVStore) DeleteWithScoped(scope, name string) {
 
 func init() {
 	kvstore := &KVStore{
-		Memory{
+		Namespace: Memory{
 			m: make(map[string]interface{}),
 		},
 	}
+	kvstore.Namespace.Init()
 	cyako.LoadService(kvstore)
 }

@@ -18,6 +18,8 @@ import (
 	cyako "github.com/Cyako/Cyako.go"
 	"github.com/Cyako/Cyako.go/kvstore"
 
+	"fmt"
+	"github.com/Centimitr/namespace"
 	"golang.org/x/net/websocket"
 )
 
@@ -50,6 +52,8 @@ type Realtime struct {
 
 // realtime use the prefix to store data in KVStore
 const KVSTORE_SCOPE_LISTENER_GROUPS = "service.realtime.listnerGroups"
+
+var kvstoreScope namespace.Scope
 
 // This method add specific *websocket.Conn to listeners list
 func (r *Realtime) AddListener(groupName string, conn *websocket.Conn, id string, method string) {
@@ -90,5 +94,8 @@ func init() {
 			KVStore: cyako.Svc["KVStore"].(*kvstore.KVStore),
 		},
 	}
+	kvstoreScope = r.Dependences.KVStore.Namespace.Use("SERVICE.REALTIME.ListenerGroups")
+	scopedValue := kvstoreScope.Get("123")
+	fmt.Println(scopedValue)
 	cyako.LoadService(r)
 }
