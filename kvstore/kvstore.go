@@ -21,7 +21,8 @@ import (
 	"github.com/Centimitr/namespace"
 )
 
-type Interfacce interface {
+type Interface interface {
+	Init()
 	Get(string) interface{}
 	Set(string, interface{})
 	Has(string) bool
@@ -31,7 +32,7 @@ type Interfacce interface {
 }
 
 type KVStore struct {
-	Interfacce
+	store     Interface
 	Namespace namespace.Namespace
 }
 
@@ -39,28 +40,31 @@ func GetScopedKeyString(scope, name string) string {
 	return scope + "." + name
 }
 
+func (k *KVStore) Init() {
+	k.store.Init()
+	k.Namespace.Init()
+}
+
 func (k *KVStore) GetWithScoped(scope, name string) interface{} {
-	return k.Get(GetScopedKeyString(scope, name))
+	return k.store.Get(GetScopedKeyString(scope, name))
 }
 
 func (k *KVStore) SetWithScoped(scope, name string, value interface{}) {
-	k.Set(GetScopedKeyString(scope, name), value)
+	k.store.Set(GetScopedKeyString(scope, name), value)
 }
 
 func (k *KVStore) HasWithScoped(scope, name string) bool {
-	return k.Has(GetScopedKeyString(scope, name))
+	return k.store.Has(GetScopedKeyString(scope, name))
 }
 
 func (k *KVStore) DeleteWithScoped(scope, name string) {
-	k.Delete(GetScopedKeyString(scope, name))
+	k.store.Delete(GetScopedKeyString(scope, name))
 }
 
 func init() {
 	kvstore := &KVStore{
-		Namespace: Memory{
-			m: make(map[string]interface{}),
-		},
+		store: Memory{},
 	}
-	kvstore.Namespace.Init()
+	kvstore.Init()
 	cyako.LoadService(kvstore)
 }

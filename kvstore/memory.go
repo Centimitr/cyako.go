@@ -23,6 +23,10 @@ type Memory struct {
 	m     map[string]interface{}
 }
 
+func (s Memory) Init() {
+	s.m = make(map[string]interface{})
+}
+
 func (s Memory) Get(key string) interface{} {
 	s.mutex.RLock()
 	defer s.mutex.RUnlock()
