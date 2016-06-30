@@ -28,6 +28,7 @@ type KVStore struct {
 
 func (k *KVStore) Init() {
 	k.Interface.Init()
+	k.Namespace.Init()
 	k.Namespace.Bind(k.Interface)
 	_, k.Service = k.Namespace.Prefix("SERVICE")
 }
