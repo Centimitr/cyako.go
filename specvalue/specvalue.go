@@ -15,6 +15,7 @@
 package specvalue
 
 import (
+	ns "github.com/Centimitr/namespace"
 	cyako "github.com/Cyako/Cyako.go"
 	"github.com/Cyako/Cyako.go/kvstore"
 )
@@ -27,24 +28,25 @@ type dep struct {
 
 type SpecValue struct {
 	Dependences dep
-}
-
-// storage manipulations
-
-const KVSTORE_SCOPE_SPECVALUE = "service.specvalue.storage"
-
-func (s *SpecValue) Set(key string, value interface{}) {
-	kvstore := s.Dependences.KVStore
-	kvstore.SetWithScoped(KVSTORE_SCOPE_SPECVALUE, key, value)
+	Scope       ns.Scope
 }
 
 type Value struct {
 	Value interface{}
 }
 
-func (s *SpecValue) Get(key string) *Value {
-	kvstore := s.Dependences.KVStore
-	return &Value{Value: kvstore.GetWithScoped(KVSTORE_SCOPE_SPECVALUE, key)}
+// storage manipulations
+func (s *SpecValue) Set(key string, value interface{}) {
+	// kvstore := s.Dependences.KVStore
+	// kvstore.SetWithScoped(KVSTORE_SCOPE_SPECVALUE, key, value)
+	// kvstore.Service.Extend(...)
+	s.Scope.Handler(key).Set(value)
+}
+
+func (s *SpecValue) Get(key string) interface{} {
+	// kvstore := s.Dependences.KVStore
+	// return &Value{Value: kvstore.GetWithScoped(KVSTORE_SCOPE_SPECVALUE, key)}
+	return s.Scope.Handler(key).Get()
 }
 
 type MatchFunc (func(interface{}, interface{}) bool)
@@ -53,19 +55,19 @@ func (v *Value) MatchFunc(value interface{}, fn MatchFunc) bool {
 	return fn(v.Value, value)
 }
 
-// match methods
+// // match methods
 
-func (v *Value) HasInt(value interface{}) bool {
-	return HasInt(v.Value, value)
-}
+// func (v *Value) HasInt(value interface{}) bool {
+// 	return HasInt(v.Value, value)
+// }
 
-func (v *Value) HasFloat(value interface{}) bool {
-	return HasFloat(v.Value, value)
-}
+// func (v *Value) HasFloat(value interface{}) bool {
+// 	return HasFloat(v.Value, value)
+// }
 
-func (v *Value) HasString(value interface{}) bool {
-	return HasString(v.Value, value)
-}
+// func (v *Value) HasString(value interface{}) bool {
+// 	return HasString(v.Value, value)
+// }
 
 // init
 func init() {
@@ -74,5 +76,7 @@ func init() {
 			KVStore: cyako.Svc["KVStore"].(*kvstore.KVStore),
 		},
 	}
+	// _, specValue. = specValue.Dependences.KVStore.Service.Extend("SpecValue")
+	_, specValue.Scope = specValue.Dependences.KVStore.Service.Apply("SpecValue")
 	cyako.LoadService(specValue)
 }

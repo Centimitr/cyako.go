@@ -16,54 +16,25 @@ package kvstore
 
 import (
 	// "fmt"
+	ns "github.com/Centimitr/namespace"
 	cyako "github.com/Cyako/Cyako.go"
-
-	"github.com/Centimitr/namespace"
 )
 
-type Interface interface {
-	Init()
-	Get(string) interface{}
-	Set(string, interface{})
-	Has(string) bool
-	Delete(string)
-	Disactive()
-	Active()
-}
-
 type KVStore struct {
-	store     Interface
-	Namespace namespace.Namespace
-}
-
-func GetScopedKeyString(scope, name string) string {
-	return scope + "." + name
+	ns.Interface
+	ns.Namespace
+	Service ns.Prefix
 }
 
 func (k *KVStore) Init() {
-	k.store.Init()
-	k.Namespace.Init()
-}
-
-func (k *KVStore) GetWithScoped(scope, name string) interface{} {
-	return k.store.Get(GetScopedKeyString(scope, name))
-}
-
-func (k *KVStore) SetWithScoped(scope, name string, value interface{}) {
-	k.store.Set(GetScopedKeyString(scope, name), value)
-}
-
-func (k *KVStore) HasWithScoped(scope, name string) bool {
-	return k.store.Has(GetScopedKeyString(scope, name))
-}
-
-func (k *KVStore) DeleteWithScoped(scope, name string) {
-	k.store.Delete(GetScopedKeyString(scope, name))
+	k.Interface.Init()
+	k.Namespace.Bind(k.Interface)
+	_, k.Service = k.Namespace.Prefix("SERVICE")
 }
 
 func init() {
 	kvstore := &KVStore{
-		store: Memory{},
+		Interface: &ns.Map{},
 	}
 	kvstore.Init()
 	cyako.LoadService(kvstore)

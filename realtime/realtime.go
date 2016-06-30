@@ -18,8 +18,7 @@ import (
 	cyako "github.com/Cyako/Cyako.go"
 	"github.com/Cyako/Cyako.go/kvstore"
 
-	"fmt"
-	"github.com/Centimitr/namespace"
+	ns "github.com/Centimitr/namespace"
 	"golang.org/x/net/websocket"
 )
 
@@ -48,22 +47,24 @@ func (l *Listener) Receive(res *cyako.Res) {
 
 type Realtime struct {
 	Dependences dep
+	Scope       ns.Scope
 }
 
 // realtime use the prefix to store data in KVStore
-const KVSTORE_SCOPE_LISTENER_GROUPS = "service.realtime.listnerGroups"
-
-var kvstoreScope namespace.Scope
+// const KVSTORE_SCOPE_LISTENER_GROUPS = "service.realtime.listnerGroups"
 
 // This method add specific *websocket.Conn to listeners list
 func (r *Realtime) AddListener(groupName string, conn *websocket.Conn, id string, method string) {
-	kvstore := r.Dependences.KVStore
+	// kvstore := r.Dependences.KVStore
 	listeners := []Listener{}
-	if kvstore.HasWithScoped(KVSTORE_SCOPE_LISTENER_GROUPS, groupName) {
-		listeners = kvstore.GetWithScoped(KVSTORE_SCOPE_LISTENER_GROUPS, groupName).([]Listener)
-	}
+	// if kvstore.HasWithScoped(KVSTORE_SCOPE_LISTENER_GROUPS, groupName) {
+	// 	listeners = kvstore.GetWithScoped(KVSTORE_SCOPE_LISTENER_GROUPS, groupName).([]Listener)
+	// }
 	listeners = append(listeners, Listener{Conn: conn, Id: id})
-	kvstore.SetWithScoped(KVSTORE_SCOPE_LISTENER_GROUPS, groupName, listeners)
+	// kvstore.SetWithScoped(KVSTORE_SCOPE_LISTENER_GROUPS, groupName, listeners)
+	if r.Scope.Handler(groupName).Has() {
+		r.Scope.Handler(groupName).Set(listeners)
+	}
 }
 
 func (r *Realtime) AddListenerDefault(groupName string, ctx *cyako.Ctx) {
@@ -72,10 +73,13 @@ func (r *Realtime) AddListenerDefault(groupName string, ctx *cyako.Ctx) {
 
 // Send response to listeners in some group
 func (r *Realtime) Send(groupName string, res *cyako.Res) {
-	kvstore := r.Dependences.KVStore
+	// kvstore := r.Dependences.KVStore
 	listeners := []Listener{}
-	if kvstore.HasWithScoped(KVSTORE_SCOPE_LISTENER_GROUPS, groupName) {
-		listeners = kvstore.GetWithScoped(KVSTORE_SCOPE_LISTENER_GROUPS, groupName).([]Listener)
+	// if kvstore.HasWithScoped(KVSTORE_SCOPE_LISTENER_GROUPS, groupName) {
+	// 	listeners = kvstore.GetWithScoped(KVSTORE_SCOPE_LISTENER_GROUPS, groupName).([]Listener)
+	// }
+	if r.Scope.Handler(groupName).Has() {
+		listeners = r.Scope.Handler(groupName).Get().([]Listener)
 	}
 	for _, listener := range listeners {
 		res.Id = listener.Id
@@ -94,8 +98,6 @@ func init() {
 			KVStore: cyako.Svc["KVStore"].(*kvstore.KVStore),
 		},
 	}
-	kvstoreScope = r.Dependences.KVStore.Namespace.Use("SERVICE.REALTIME.ListenerGroups")
-	scopedValue := kvstoreScope.Get("123")
-	fmt.Println(scopedValue)
+	_, r.Scope = r.Dependences.KVStore.Service.Apply("Realtime")
 	cyako.LoadService(r)
 }
