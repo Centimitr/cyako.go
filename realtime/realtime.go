@@ -18,6 +18,7 @@ import (
 	cyako "github.com/Cyako/Cyako.go"
 	"github.com/Cyako/Cyako.go/kvstore"
 
+	"fmt"
 	ns "github.com/Centimitr/namespace"
 	"golang.org/x/net/websocket"
 )
@@ -36,6 +37,7 @@ type Listener struct {
 }
 
 func (l *Listener) Receive(res *cyako.Res) {
+	fmt.Println("Receive:", l.Conn, res)
 	if l.Conn == nil {
 		return
 	}
@@ -73,6 +75,7 @@ func (r *Realtime) AddListenerDefault(groupName string, ctx *cyako.Ctx) {
 
 // Send response to listeners in some group
 func (r *Realtime) Send(groupName string, res *cyako.Res) {
+	fmt.Println("Start Sending.")
 	// kvstore := r.Dependences.KVStore
 	listeners := []Listener{}
 	// if kvstore.HasWithScoped(KVSTORE_SCOPE_LISTENER_GROUPS, groupName) {
@@ -81,6 +84,7 @@ func (r *Realtime) Send(groupName string, res *cyako.Res) {
 	if r.Scope.Handler(groupName).Has() {
 		listeners = r.Scope.Handler(groupName).Get().([]Listener)
 	}
+	fmt.Println("listners:", listeners)
 	for _, listener := range listeners {
 		res.Id = listener.Id
 		res.Method = listener.Method
@@ -98,6 +102,7 @@ func init() {
 			KVStore: cyako.Svc["KVStore"].(*kvstore.KVStore),
 		},
 	}
-	_, r.Scope = r.Dependences.KVStore.Service.Apply("Realtime")
+	_, r.Scope = r.Dependences.KVStore.Service.Apply("REALTIME")
 	cyako.LoadService(r)
+	fmt.Println("LOAD REALTIME.", r)
 }
