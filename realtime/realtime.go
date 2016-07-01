@@ -57,16 +57,12 @@ type Realtime struct {
 
 // This method add specific *websocket.Conn to listeners list
 func (r *Realtime) AddListener(groupName string, conn *websocket.Conn, id string, method string) {
-	// kvstore := r.Dependences.KVStore
 	listeners := []Listener{}
-	// if kvstore.HasWithScoped(KVSTORE_SCOPE_LISTENER_GROUPS, groupName) {
-	// 	listeners = kvstore.GetWithScoped(KVSTORE_SCOPE_LISTENER_GROUPS, groupName).([]Listener)
-	// }
-	listeners = append(listeners, Listener{Conn: conn, Id: id})
-	// kvstore.SetWithScoped(KVSTORE_SCOPE_LISTENER_GROUPS, groupName, listeners)
 	if r.Scope.Handler(groupName).Has() {
-		r.Scope.Handler(groupName).Set(listeners)
+		listeners = r.Scope.Handler(groupName).Get().([]Listener)
 	}
+	listeners = append(listeners, Listener{Conn: conn, Id: id})
+	r.Scope.Handler(groupName).Set(listeners)
 }
 
 func (r *Realtime) AddListenerDefault(groupName string, ctx *cyako.Ctx) {
@@ -76,11 +72,7 @@ func (r *Realtime) AddListenerDefault(groupName string, ctx *cyako.Ctx) {
 // Send response to listeners in some group
 func (r *Realtime) Send(groupName string, res *cyako.Res) {
 	fmt.Println("Start Sending.")
-	// kvstore := r.Dependences.KVStore
 	listeners := []Listener{}
-	// if kvstore.HasWithScoped(KVSTORE_SCOPE_LISTENER_GROUPS, groupName) {
-	// 	listeners = kvstore.GetWithScoped(KVSTORE_SCOPE_LISTENER_GROUPS, groupName).([]Listener)
-	// }
 	if r.Scope.Handler(groupName).Has() {
 		listeners = r.Scope.Handler(groupName).Get().([]Listener)
 	}
@@ -104,5 +96,4 @@ func init() {
 	}
 	_, r.Scope = r.Dependences.KVStore.Service.Apply("REALTIME")
 	cyako.LoadService(r)
-	fmt.Println("LOAD REALTIME.", r)
 }
