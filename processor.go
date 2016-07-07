@@ -67,7 +67,7 @@ func (c *Cyako) loadModule(x interface{}) {
 	t := v.Type()
 	for i := 0; i < v.NumMethod(); i++ {
 		index := i
-		c.ProcessorMap[t.Name()+"."+t.Method(i).Name] = &Processor{
+		p = &Processor{
 			PkgPath: t.PkgPath(),
 			Module:  t.Name(),
 			Name:    t.Method(i).Name,
@@ -75,5 +75,29 @@ func (c *Cyako) loadModule(x interface{}) {
 				return t.Method(index).Func.Call([]reflect.Value{v, reflect.ValueOf(ctx)})
 			},
 		}
+		getNameTypeA := func(t *reflect.Type) string {
+			module := t.Name()
+			sep := "."
+			method := t.Method(i).Name
+			return module + sep + method
+		}
+		getNameTypeB := func(t *reflect.Type) string {
+			getModuleName := func(pre string) string {
+				// vmark := []string{
+				// 	"V", "v",
+				// 	"Alpha", "alpha",
+				// 	"Beta", "beta",
+				// 	"RC", "rc",
+				// 	"Fix", "fix", "Hotfix", "hotfix", "Bug", "bug",
+				// }
+				return pre
+			}
+			module := getModuleName(t.Name())
+			sep := "."
+			method := t.Method(i).Name
+			return module + sep + method
+		}
+		c.ProcessorMap[getNameTypeA(t)] = p
+		c.ProcessorMap[getNameTypeB(t)] = p
 	}
 }
