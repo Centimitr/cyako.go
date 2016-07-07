@@ -24,6 +24,15 @@ import (
 /*
 	Processor & Processor Module
 */
+type Module struct {
+	// plan to cut methods' ctx params
+	ctx *Ctx
+	dep map[string]interface{}
+}
+
+func (m *Module) Init() {
+	m.dep = make(map[string]interface{})
+}
 
 type Processor struct {
 	Module  string
