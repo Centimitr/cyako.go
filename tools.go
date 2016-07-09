@@ -32,9 +32,9 @@ func (c *Cyako) PrintLoadInfo() {
 		fmt.Printf(" %-35s %-10v %-10v %-10v %-10v %-10v\n", c.Name, c.AfterReceive, c.BeforeProcess, c.AfterProcess, c.BeforeSend, c.AfterSend)
 	}
 
-	fmt.Printf("\n %-35s %-10s %-40s\n", "API", "Module", "Package Path")
+	fmt.Printf("\n %-35s %-50s\n", "API", "Package Path")
 	for _, proc := range c.ProcessorMap {
-		fmt.Printf(" %-35s %-10s %-40s\n", proc.Module+"."+proc.Name, proc.Module, proc.PkgPath)
+		fmt.Printf(" %-35s %-50s\n", proc.Module+"."+proc.Name, proc.PkgPath)
 	}
 }
 

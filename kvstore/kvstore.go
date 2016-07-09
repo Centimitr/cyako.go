@@ -20,22 +20,35 @@ import (
 	cyako "github.com/Cyako/Cyako.go"
 )
 
+type Interface interface {
+	Init()
+	Get(string) interface{}
+	Set(string, interface{})
+	Has(string) bool
+	Delete(string)
+	Disactive()
+	Active()
+}
+
 type KVStore struct {
-	ns.Interface
+	Interface
 	ns.Namespace
-	Service ns.Prefix
+	NamePrefix ns.Prefix
 }
 
 func (k *KVStore) Init() {
-	k.Interface.Init()
 	k.Namespace.Init()
-	k.Namespace.Bind(k.Interface)
-	_, k.Service = k.Namespace.Prefix("SERVICE")
+	k.Interface.Init()
+	_, k.NamePrefix = k.Namespace.Prefix("Service")
+}
+
+func (k *KVStore) Disactive() {
+	k.Interface.Disactive()
 }
 
 func init() {
 	kvstore := &KVStore{
-		Interface: &ns.Map{},
+		Interface: &Memory{},
 	}
 	kvstore.Init()
 	cyako.LoadService(kvstore)

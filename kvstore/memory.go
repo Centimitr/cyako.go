@@ -15,6 +15,8 @@
 package kvstore
 
 import (
+	"encoding/json"
+	"io/ioutil"
 	"sync"
 )
 
@@ -61,6 +63,8 @@ func (s *Memory) Delete(key string) {
 func (s *Memory) Disactive() {
 	s.mutex.Lock()
 	defer s.mutex.Unlock()
+	content, _ := json.Marshal(s.m)
+	ioutil.WriteFile("KVStore.Memory.Dump", content, 0777)
 }
 
 func (s *Memory) Active() {

@@ -26,9 +26,9 @@ import (
 /*
 	define
 */
-type dep struct {
-	KVStore *kvstore.KVStore
-}
+// type dep struct {
+// 	KVStore *kvstore.KVStore
+// }
 
 type Listener struct {
 	Conn   *websocket.Conn
@@ -48,21 +48,29 @@ func (l *Listener) Receive(res *cyako.Res) {
 }
 
 type Realtime struct {
-	Dependences dep
-	Scope       ns.Scope
+	// Dependences        dep
+	KVStore            *kvstore.KVStore
+	NameScopeListeners ns.Scope
 }
-
-// realtime use the prefix to store data in KVStore
-// const KVSTORE_SCOPE_LISTENER_GROUPS = "service.realtime.listnerGroups"
 
 // This method add specific *websocket.Conn to listeners list
 func (r *Realtime) AddListener(groupName string, conn *websocket.Conn, id string, method string) {
+	// listeners := []Listener{}
+	// if r.Scope.Handler(groupName).Has() {
+	// 	listeners = r.Scope.Handler(groupName).Get().([]Listener)
+	// }
+	// listeners = append(listeners, Listener{Conn: conn, Id: id})
+	// r.Scope.Handler(groupName).Set(listeners)
+
+	key := r.NameScopeListeners.Key(groupName)
+
 	listeners := []Listener{}
-	if r.Scope.Handler(groupName).Has() {
-		listeners = r.Scope.Handler(groupName).Get().([]Listener)
+	if r.KVStore.Has(key) {
+		listeners = r.KVStore.Get(key).([]Listener)
 	}
 	listeners = append(listeners, Listener{Conn: conn, Id: id})
-	r.Scope.Handler(groupName).Set(listeners)
+
+	r.KVStore.Set(key, listeners)
 }
 
 func (r *Realtime) AddListenerDefault(groupName string, ctx *cyako.Ctx) {
@@ -71,12 +79,24 @@ func (r *Realtime) AddListenerDefault(groupName string, ctx *cyako.Ctx) {
 
 // Send response to listeners in some group
 func (r *Realtime) Send(groupName string, res *cyako.Res) {
-	fmt.Println("Start Sending.")
+	// fmt.Println("Start Sending.")
+	// listeners := []Listener{}
+	// if r.Scope.Handler(groupName).Has() {
+	// 	listeners = r.Scope.Handler(groupName).Get().([]Listener)
+	// }
+	// fmt.Println("listners:", listeners)
+	// for _, listener := range listeners {
+	// 	res.Id = listener.Id
+	// 	res.Method = listener.Method
+	// 	listener.Receive(res)
+	// }
+
+	key := r.NameScopeListeners.Key(groupName)
+
 	listeners := []Listener{}
-	if r.Scope.Handler(groupName).Has() {
-		listeners = r.Scope.Handler(groupName).Get().([]Listener)
+	if r.KVStore.Has(key) {
+		listeners = r.KVStore.Get(key).([]Listener)
 	}
-	fmt.Println("listners:", listeners)
 	for _, listener := range listeners {
 		res.Id = listener.Id
 		res.Method = listener.Method
@@ -90,10 +110,11 @@ func (r *Realtime) Send(groupName string, res *cyako.Res) {
 
 func init() {
 	r := &Realtime{
-		Dependences: dep{
-			KVStore: cyako.Svc["KVStore"].(*kvstore.KVStore),
-		},
+		// Dependences: dep{
+		KVStore: cyako.Svc["KVStore"].(*kvstore.KVStore),
+		// },
 	}
-	_, r.Scope = r.Dependences.KVStore.Service.Apply("REALTIME")
+	// _, r.NameScopeListeners = r.Dependences.KVStore.NamePrefix.Apply("Listeners")
+	_, r.NameScopeListeners = r.KVStore.NamePrefix.Apply("Listeners")
 	cyako.LoadService(r)
 }
